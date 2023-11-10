@@ -2,16 +2,20 @@
 
 // List of keywords for database operations and their corresponding StatementType
 const static WordList keywords = {
-        {"insert", STATEMENT_INSERT},
-        {"delete", STATEMENT_DELETE},
+        {"insert", STATEMENT_ADD},
+        {"add", STATEMENT_ADD},
+        {"new", STATEMENT_ADD},
+        {"delete", STATEMENT_REMOVE},
+        {"cancel", STATEMENT_REMOVE},
+        {"trade", STATEMENT_REMOVE},
         {"select", STATEMENT_QUERY},
         {"exit", STATEMENT_EXIT},
-        {"q", STATEMENT_EXIT},
-        {"update", STATEMENT_UPDATE}
+        {"q", STATEMENT_EXIT}
 };
 
-// Getters and Setters for Command class as well as its Constructor
-Command::Command() { this->type = STATEMENT_EMPTY; this->text = ""; }
+// Getters and Setters for Command class as well as its Constructors
+Command::Command() { this->type = STATEMENT_EMPTY; }
+Command::Command(OrderBookPtr order_book) { this->type = STATEMENT_EMPTY; this->order_book = order_book; }
 void Command::setType(StatementType type) { this->type = type; }
 std::string Command::getText() { return this->text; }
 StatementType Command::getType() { return this-> type; }
@@ -30,21 +34,61 @@ void Command::toLower() {
                     [](unsigned char c) { return std::tolower(c); });
 }
 
+// Helper function to parse the command
+void Command::parse() {
+    // Transforms string to istringstream then tokenizes it into a vector
+    std::istringstream iss(this->text);
+    std::vector<std::string> values(
+        std::istream_iterator<std::string>{iss},
+        std::istream_iterator<std::string>()
+    );
+    
+    // Parses the command based on the number of tokens
+    switch (values.size()) {
+        case 7: {
+            this->epoch = std::stoull(values[0]);
+            this->symbol = values[2];
+            this->side = (values[3] == "BUY") ? BUY : SELL;
+            this->type = (keywords.find(values[4]) == keywords.end()) ? STATEMENT_COMMAND_UNRECOGNIZED : keywords.at(values[4]);
+            this->price = std::stof(values[5]);
+            this->quantity = std::stoi(values[6]);
+            break;
+        }
+        
+        /* For debugging */
+        case 1: {
+            this->type = (keywords.find(values[0]) == keywords.end()) ? STATEMENT_COMMAND_UNRECOGNIZED : keywords.at(values[0]);    
+            break;
+        }
+
+        case 2: {
+            this->type = (keywords.find(values[0]) == keywords.end()) ? STATEMENT_COMMAND_UNRECOGNIZED : keywords.at(values[0]);
+
+            /* Can be improved with another switch statement with dictionary parsing and enum */
+            if (values[1] == "*") {
+                std::cout << *(this->order_book) << std::endl;
+            } else if (values[1] == "top") {
+                this->order_book->topFive();
+            } else {
+                std::cout << "Invalid symbol" << std::endl;
+            }
+            break;
+        }
+
+        default:
+            break;
+    }
+}
+
 // Overloads the >> operator for the Command class
 std::istream& operator>>(std::istream &istream, Command &command) {
-    std::string first_word;
     std::getline(istream, command.text);
-
     if (command.text.empty()) {
         command.setType(STATEMENT_EMPTY);
         return istream;
     }
 
-    command.toLower();
-    first_word = getFirstWord(command.getText());
-
-    if (keywords.find(first_word) == keywords.end()) { command.setType(STATEMENT_COMMAND_UNRECOGNIZED); }
-    else { command.setType(keywords.at(first_word)); }
+    command.parse();
 
     return istream;
 }
@@ -52,7 +96,56 @@ std::istream& operator>>(std::istream &istream, Command &command) {
 // Executes the command
 MetaCommandResult Command::executeStatement() {
     /* To be implmented further */
-    if (this->type == STATEMENT_EXIT) { return META_COMMAND_QUIT; }
 
-    return (this->type == STATEMENT_COMMAND_UNRECOGNIZED) ? META_COMMAND_UNRECOGNIZED : META_COMMAND_SUCCESS;
+    switch (this->type) {
+        case STATEMENT_EXIT: {
+            return META_COMMAND_QUIT;
+        }
+
+        case STATEMENT_ADD: {
+            this->order_book->add(this->price, this->quantity, this->side);
+            return META_COMMAND_SUCCESS;
+        }
+
+        case STATEMENT_REMOVE: {
+            this->order_book->remove(this->price, this->quantity, this->side);
+            return META_COMMAND_SUCCESS;
+        }
+
+        case STATEMENT_COMMAND_UNRECOGNIZED: {
+            return META_COMMAND_UNRECOGNIZED;
+        }
+
+        default: {
+            return META_COMMAND_SUCCESS;
+        }
+    }
+
+    return META_COMMAND_SUCCESS;
+}
+
+// Loads the database from a log file of commands and executes the commands
+void Command::load(std::ifstream &file) {
+    // To be implemented further
+    // Needs proper command parsing
+    while (file >> *this) {
+        switch (this->executeStatement()) {
+            case META_COMMAND_SUCCESS: {
+                break;
+            }
+            
+            case META_COMMAND_UNRECOGNIZED: {
+                std::cout << "Unrecognized command " << this->getText() << std::endl;
+                break;
+            }
+
+            case META_COMMAND_QUIT: {
+                exit(EXIT_SUCCESS);
+                return;
+                break;
+            }
+        }
+    }
+
+    file.close();
 }
