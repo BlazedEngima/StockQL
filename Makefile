@@ -1,6 +1,6 @@
 # Variables
 CXX = g++
-CXXFLAGS = -Wall -Isrc/include -std=c++17 -O3
+CXXFLAGS = -Wall -Wextra -pedantic -Isrc/include -std=c++17 -O3
 SRC = $(wildcard src/*.cpp src/util/*.cpp)
 TARGET = main.out
 

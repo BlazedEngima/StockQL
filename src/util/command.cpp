@@ -1,7 +1,7 @@
 #include "../include/command.h"
 
 // List of keywords for database operations and their corresponding StatementType
-WordList keywords = {
+const static WordList keywords = {
         {"insert", STATEMENT_INSERT},
         {"delete", STATEMENT_DELETE},
         {"select", STATEMENT_QUERY},
