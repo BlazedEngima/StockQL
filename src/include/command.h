@@ -49,8 +49,7 @@ class Command {
         StringVector command_args;
 
         /*
-        *   table - A pointer to a Table class
-        *   Currently effectively only an unordered map to tables
+        *   table - A pointer to the Table class
         */
         Table *table;
 
@@ -66,6 +65,7 @@ class Command {
 
         /*
         *   handle_query(std::ostream &) - Handles the query command
+        *   To do: Add table switching functionality
         */
         void handle_query(std::ostream &);
 
@@ -88,12 +88,17 @@ class Command {
         *   META_COMMAND_SUCCESS - The command was executed successfully
         *   META_COMMAND_UNRECOGNIZED - The command was not recognized
         *   META_COMMAND_QUIT - The command was quit
-        *   (to be implemented further)
+        *
+        *   To do: Add table switching functionality (Requires Pager class to be done)
+        *          Add more commands to support SQL-like syntax
         */
         MetaCommandResult executeStatement(std::ostream &);
 
         /*
         *   load() - Loads the database from a log file of commands and executes the commands
+        *   Currently, the function is being developed and is not tested yet thus unused for now
+        *   
+        *   To do: Proper testing
         */
         void load(std::ifstream &);
         

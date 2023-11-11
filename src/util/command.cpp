@@ -118,7 +118,8 @@ void Command::parse() {
                 this->epoch = 0;
 
                 // Increase length of command_args to 4 to account for the query field
-                // Improvements to be made here
+                // Enables query searches such as "select symbol *" and "select symbol top"
+                // Improvements can be made here
                 this->command_args.push_back(this->command_args[2]);
                 return;
             }
@@ -133,6 +134,9 @@ void Command::parse() {
     }
 }
 
+// Handles the query command
+// Can be improved by being able to index into different tables
+// Requires Pager class to be complete for improvement
 void Command::handle_query(std::ostream &os) {
     // Search epoch
     RecordData query = this->table->search(this->epoch);
@@ -147,7 +151,6 @@ void Command::handle_query(std::ostream &os) {
         // Switch statment to handle the different query fields
         // Can be improved
         switch (query_fields.at(this->command_args[i])) {
-            /* Not done, needs further implmentation */
             case ALL: {
                 os << this->table->order_book << std::endl;
                 break;
@@ -305,7 +308,6 @@ std::ostream& operator<<(std::ostream &os, const Command &command) {
 MetaCommandResult Command::executeStatement(std::ostream &os) {
 
     // Execute statement based on the type of command
-    // To be implemented further
     // Missing functionality for multiple symbols as Pager class is not complete
 
     switch (this->type) {
@@ -325,8 +327,10 @@ MetaCommandResult Command::executeStatement(std::ostream &os) {
             return META_COMMAND_SUCCESS;
         }
 
+        // Fall-through is intended
         case STATEMENT_TRADE: {
             this->table->order_book.set_last_trade(this->price, this->quantity);
+            [[fallthrough]];
         }
 
         case STATEMENT_REMOVE: {
