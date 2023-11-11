@@ -4,6 +4,8 @@
 
 #include <iostream>
 #include <unordered_map>
+#include <vector>
+#include <string>
 #include <map>
 #include <fstream>
 
@@ -33,7 +35,6 @@ class OrderBook {
         void printSide(std::ostream &, Side side, bool) const;
 
     public:
-
         /*
         *   isEmpty() - Checks if the orderbook is empty
         */
@@ -76,6 +77,16 @@ class OrderBook {
         *   unsigned int - The index of the entry to print (1 - 5 corresponding to lowest/highest bid/ask)
         */
         void print_entry(std::ostream &, bool, Side, unsigned int) const;
+
+        /*
+        *   get_entry() - Returns a specified entry from the order book
+        */
+        std::string get_entry(bool, Side, unsigned int) const;
+
+        /*
+        *   get_query_fields() - Returns a vector of the fields to be queried
+        */
+        void get_query_fields(std::vector<std::string> &) const;
 
         /*
         *   print() - Prints the orderbook

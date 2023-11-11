@@ -17,7 +17,7 @@ unsigned int OrderBook::get_last_trade_quantity() const { return this->last_trad
 
 // Add value to the orderbook
 void OrderBook::add(float price, unsigned int quantity, Side side) {
-    // Add to the appropriate side 
+    // Add to the appropriate side
     PriceMap *map = (side == BUY) ? &(this->bids) : &(this->asks);
 
     // If the price does not exist, then make a new key-value pair
@@ -42,7 +42,7 @@ void OrderBook::remove(float price, unsigned int quantity, Side side) {
 
     // Remove the quantity from the price
     map->at(price) -= quantity;
-    if (this->bids[price] == 0) { map->erase(price); }
+    if (map->at(price) == 0) { map->erase(price); }
 
 }
 
@@ -90,13 +90,15 @@ void OrderBook::topFive(std::ostream &os) const {
 
 // Print a specified entry from the order book
 void OrderBook::print_entry(std::ostream &os, bool price, Side side, unsigned int index) const {
+    os << this->get_entry(price, side, index) << std::endl;
+}
+
+// Get a specified entry from the order book
+std::string OrderBook::get_entry(bool price, Side side, unsigned int index) const {
     const PriceMap *map = (side == BUY) ? &(this->bids) : &(this->asks);
 
-    // std::cout << "Test" << std::endl;
-
     if (map->empty()) {
-        std::cout << "No orders" << std::endl;
-        return;
+        return "0";
     }
 
     // Choose to begin at the start or at the end of the map
@@ -105,16 +107,42 @@ void OrderBook::print_entry(std::ostream &os, bool price, Side side, unsigned in
         std::advance(it, index - 1);
 
         // Print price or quantity
-        if (price) { os << it->first << std::endl; }
-        else { os << it->second << std::endl; }
+        if (price) { return std::to_string(it->first); }
+        else { return std::to_string(it->second); }
 
     } else {
         auto it = map->begin();
         std::advance(it, index - 1);
 
-        if (price) { os << it->first << std::endl; }
-        else { os << it->second << std::endl; }
+        if (price) { return std::to_string(it->first); }
+        else { return std::to_string(it->second); }
     }
+}
+
+// Get the query fields for the order book
+void OrderBook::get_query_fields(std::vector<std::string> &tokens) const {
+    tokens.push_back(this->get_entry(true, SELL, 1));
+    tokens.push_back(this->get_entry(true, SELL, 2));
+    tokens.push_back(this->get_entry(true, SELL, 3));
+    tokens.push_back(this->get_entry(true, SELL, 4));
+    tokens.push_back(this->get_entry(true, SELL, 5));
+    tokens.push_back(this->get_entry(true, BUY, 1));
+    tokens.push_back(this->get_entry(true, BUY, 2));
+    tokens.push_back(this->get_entry(true, BUY, 3));
+    tokens.push_back(this->get_entry(true, BUY, 4));
+    tokens.push_back(this->get_entry(true, BUY, 5));
+    tokens.push_back(this->get_entry(false, SELL, 1));
+    tokens.push_back(this->get_entry(false, SELL, 2));
+    tokens.push_back(this->get_entry(false, SELL, 3));
+    tokens.push_back(this->get_entry(false, SELL, 4));
+    tokens.push_back(this->get_entry(false, SELL, 5));
+    tokens.push_back(this->get_entry(false, BUY, 1));
+    tokens.push_back(this->get_entry(false, BUY, 2));
+    tokens.push_back(this->get_entry(false, BUY, 3));
+    tokens.push_back(this->get_entry(false, BUY, 4));
+    tokens.push_back(this->get_entry(false, BUY, 5));
+    tokens.push_back(std::to_string(this->get_last_trade_price()));
+    tokens.push_back(std::to_string(this->get_last_trade_quantity()));
 }
 
 // Overloads the << operator to print the whole OrderBook
@@ -125,12 +153,11 @@ std::ostream& operator<<(std::ostream &os, const OrderBook &orderbook) {
         return os;
     }
 
-    os << "Bids:" << std::endl;
     orderbook.printSide(os, BUY, false);
 
-    os << std::endl;
+    // Indicator between bids and asks
+    os << "//" << std::endl;
 
-    os << "Asks:" << std::endl;
     orderbook.printSide(os, SELL, false);
     return os;
 }
