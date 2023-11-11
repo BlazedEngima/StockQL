@@ -21,7 +21,7 @@ int main(int argc, char const *argv[]) {
         std::cout << "db >  ";
         std::cin >> command;
 
-        switch (command.executeStatement()) {
+        switch (command.executeStatement(std::cout)) {
             case META_COMMAND_SUCCESS: {
                 break;
             }
