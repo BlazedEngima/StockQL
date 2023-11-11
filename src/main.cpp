@@ -4,18 +4,19 @@
 
 // Main function that uses REPL loop
 int main(int argc, char const *argv[]) {
-    OrderBookPtr order_book = std::make_shared<OrderBook>();
-    Command command(order_book);
+    std::string filename;
 
-    // std::string filename = "../data/SCH.log";
-    // std::ifstream file(filename);
+    if (argc == 1) {
+        filename = "database";
+    } else if (argc == 2) { // Name of database file is passed as argument
+        filename = argv[1];
+    } else {
+        std::cout << "Usage: " << argv[0] << " [database file]" << std::endl;
+        exit(EXIT_FAILURE);
+    }
 
-    // if (!file.is_open()) {
-    //     std::cout << "Could not open file " << filename << std::endl;
-    //     exit(EXIT_FAILURE);
-    // }
-
-    // command.load(file);
+    Table table(filename);
+    Command command(&table);
 
     while (true) {
         std::cout << "db >  ";

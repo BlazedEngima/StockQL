@@ -20,7 +20,9 @@ const static WordMap keywords = {
         {"EXIT", STATEMENT_EXIT},
         {"exit", STATEMENT_EXIT},
         {"q", STATEMENT_EXIT},
-        {"Q", STATEMENT_EXIT}
+        {"Q", STATEMENT_EXIT},
+        {"quit", STATEMENT_EXIT},
+        {"QUIT", STATEMENT_EXIT}
 };
 
 // List of query fields and their corresponding QueryType
@@ -53,17 +55,13 @@ const static QueryMap query_fields = {
 };
 
 // Command class constructors
-Command::Command() { 
+Command::Command(Table *table) { 
     this->type = STATEMENT_EMPTY;
+    this->table = table;
     this->price = 0.0;
     this->quantity = 0;
-}
-
-Command::Command(OrderBookPtr order_book) {
-    this->type = STATEMENT_EMPTY;
-    this->order_book = order_book;
-    this->price = 0.0;
-    this->quantity = 0;
+    this->epoch = 0;
+    this->last_epoch = 0;
 }
 
 // Getters and Setters
@@ -96,7 +94,7 @@ void Command::parse() {
         // If it is a log, then treat it as an add command and insert it into the order book
         this->epoch = std::stoull(this->command_args[0]);
         this->symbol = this->command_args[2];
-        this->side = (this->command_args[3] == "BUY") ? BUY : SELL;
+        this->side = (this->command_args[3] == "BUY" || this->command_args[3] == "buy") ? BUY : SELL;
         this->type = (keywords.find(this->command_args[4]) == keywords.end()) ? STATEMENT_COMMAND_UNRECOGNIZED : keywords.at(this->command_args[4]);
         this->price = std::stof(this->command_args[5]);
         this->quantity = std::stoi(this->command_args[6]);
@@ -114,157 +112,159 @@ void Command::parse() {
     // Parses the command based on the number of tokens
     switch (this->type) {
         case STATEMENT_QUERY: {
-            try {
-                this->symbol = this->command_args[1];
-                this->epoch = std::stoull(this->command_args[2]);
-            } catch (const std::invalid_argument&) {
-                this->type = STATEMENT_COMMAND_UNRECOGNIZED;
+            this->symbol = this->command_args[1];
+
+            if (this->command_args.size() == 3) {
+                this->epoch = 0;
+
+                // Increase length of command_args to 4 to account for the query field
+                // Improvements to be made here
+                this->command_args.push_back(this->command_args[2]);
                 return;
             }
 
+            this->epoch = std::stoull(this->command_args[2]);
             break;
         }
 
-        /* For debugging */
+        /* To be implemented further */
         default:
             break;
     }
 }
 
 void Command::handle_query(std::ostream &os) {
-    // Checks to see if the epoch exists in the order book
-    // if (this->order_book->at(this->symbol).find(this->epoch) == this->order_book->at(this->symbol).end()) {
-    //     std::cout << "No such epoch exists" << std::endl;
-    //     return;
-    // }
+    // Search epoch
+    RecordData query = this->table->search(this->epoch);
 
-
+    // If not then search and load it from file
     for (size_t i = 3; i < this->command_args.size(); i++) {
         if (query_fields.find(this->command_args[i]) == query_fields.end()) {
             std::cout << "No such query field exists" << std::endl;
             return;
         }
 
-        // std::cout << "Test" << std::endl;
+        // Switch statment to handle the different query fields
+        // Can be improved
         switch (query_fields.at(this->command_args[i])) {
+            /* Not done, needs further implmentation */
             case ALL: {
-                os << *(this->order_book) << std::endl;
+                os << this->table->order_book << std::endl;
                 break;
             }
 
             case TOP_5: {
-                this->order_book->topFive(os);
+                this->table->order_book.topFive(os);
                 break;
             }
 
             case LAST_TRADED_PRICE: {
-                os << this->order_book->get_last_trade_price() << std::endl;
+                os << query.last_traded_price << std::endl;
                 break;
             }
 
             case LAST_TRADED_QUANTITY: {
-                os << this->order_book->get_last_trade_quantity() << std::endl;
+                os << query.last_traded_quantity << std::endl;
                 break;
             }
 
             case ASK1P: {
-                // std::cout << "Test" << std::endl;
-                this->order_book->print_entry(os, true, SELL, 1);
+                os << query.ask1p << std::endl;
                 break;
             }
 
             case ASK1Q: {
-                this->order_book->print_entry(os, false, SELL, 1);
+                os << query.ask1q << std::endl;
                 break;
             }
 
             case ASK2P: {
-                this->order_book->print_entry(os, true, SELL, 2);
+                os << query.ask2p << std::endl;
                 break;
             }
 
             case ASK2Q: {
-                this->order_book->print_entry(os, false, SELL, 2);
+                os << query.ask2q << std::endl;
                 break;
             }
 
             case ASK3P: {
-                this->order_book->print_entry(os, true, SELL, 3);
+                os << query.ask3p << std::endl;
                 break;
             }
 
             case ASK3Q: {
-                this->order_book->print_entry(os, false, SELL, 3);
+                os << query.ask3q << std::endl;
                 break;
             }
 
             case ASK4P: {
-                this->order_book->print_entry(os, true, SELL, 4);
+                os << query.ask4p << std::endl;
                 break;
             }
 
             case ASK4Q: {
-                this->order_book->print_entry(os, false, SELL, 4);
+                os << query.ask4q << std::endl;
                 break;
             }
 
             case ASK5P: {
-                this->order_book->print_entry(os, true, SELL, 5);
+                os << query.ask5p << std::endl;
                 break;
             }
 
             case ASK5Q: {
-                this->order_book->print_entry(os, false, SELL, 5);
+                os << query.ask5q << std::endl;
                 break;
             }
 
             case BID1P: {
-                this->order_book->print_entry(os, true, BUY, 1);
+                os << query.bid1p << std::endl;
                 break;
             }
             
             case BID1Q: {
-                this->order_book->print_entry(os, false, BUY, 1);
+                os << query.bid1q << std::endl;
                 break;
             }
 
             case BID2P: {
-                this->order_book->print_entry(os, true, BUY, 2);
+                os << query.bid2p << std::endl;
                 break;
             }
 
             case BID2Q: {
-                this->order_book->print_entry(os, false, BUY, 2);
+                os << query.bid2q << std::endl;
                 break;
             }
 
             case BID3P: {
-                this->order_book->print_entry(os, true, BUY, 3);
+                os << query.bid3p << std::endl;
                 break;
             }
 
             case BID3Q: {
-                this->order_book->print_entry(os, false, BUY, 3);
+                os << query.bid3q << std::endl;
                 break;
             }
 
             case BID4P: {
-                this->order_book->print_entry(os, true, BUY, 4);
+                os << query.bid4p << std::endl;
                 break;
             }
 
             case BID4Q: {
-                this->order_book->print_entry(os, false, BUY, 4);
+                os << query.bid4q << std::endl;
                 break;
             }
 
             case BID5P: {
-                this->order_book->print_entry(os, true, BUY, 5);
+                os << query.bid5p << std::endl;
                 break;
             }
 
             case BID5Q: {
-                this->order_book->print_entry(os, false, BUY, 5);
+                os << query.bid5q << std::endl;
                 break;
             }
         }
@@ -296,21 +296,27 @@ std::istream& operator>>(std::istream &istream, Command &command) {
 
 // Overloads the << operator for the Command class to print the order book
 std::ostream& operator<<(std::ostream &os, const Command &command) {
-    os << *(command.order_book);
+    os << command.table->order_book;
+
     return os;
 }
 
 // Executes the command
 MetaCommandResult Command::executeStatement(std::ostream &os) {
-    /* To be implmented further */
+
+    // Execute statement based on the type of command
+    // To be implemented further
+    // Missing functionality for multiple symbols as Pager class is not complete
 
     switch (this->type) {
         case STATEMENT_EXIT: {
+            this->table->~Table();
             return META_COMMAND_QUIT;
         }
 
         case STATEMENT_ADD: {
-            this->order_book->add(this->price, this->quantity, this->side);
+            this->table->update(this->epoch, this->last_epoch, this->price, this->quantity, this->side, true);
+            this->last_epoch = this->epoch;
             return META_COMMAND_SUCCESS;
         }
 
@@ -320,11 +326,11 @@ MetaCommandResult Command::executeStatement(std::ostream &os) {
         }
 
         case STATEMENT_TRADE: {
-            order_book->set_last_trade(this->price, this->quantity);
+            this->table->order_book.set_last_trade(this->price, this->quantity);
         }
 
         case STATEMENT_REMOVE: {
-            this->order_book->remove(this->price, this->quantity, this->side);
+            this->table->update(this->epoch, this->last_epoch, this->price, this->quantity, this->side, false);
             return META_COMMAND_SUCCESS;
         }
 

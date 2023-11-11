@@ -2,7 +2,7 @@
 #define __COMMAND_H 
 #pragma once
 
-#include "../include/orderbook.h"
+#include "../include/pager.h"
 #include <algorithm>
 #include <memory>
 #include <cctype>
@@ -33,7 +33,8 @@ typedef std::vector<std::string> StringVector;
 class Command {
     private:
         std::string text; // The text of the command
-        uint64_t epoch; // The epoch of the command
+        uint64_t epoch; // The epoch of the current command
+        uint64_t last_epoch; // The epoch of the last add/remove command
         std::string symbol; // The name of tradable instruments
         Side side; // The side of the order
         StatementType type; // The type of the command
@@ -48,10 +49,10 @@ class Command {
         StringVector command_args;
 
         /*
-        *   order_book - A pointer to the order book
-        *   Added via dependency injection
+        *   table - A pointer to a Table class
+        *   Currently effectively only an unordered map to tables
         */
-        OrderBookPtr order_book;
+        Table *table;
 
         /*
         *   toLower() - Converts the text of the command to lowercase
@@ -74,8 +75,7 @@ class Command {
         *   initialized text to an empty string and type to STATEMENT_EMPTY
         *   order_book is added via dependency injection otherwise it is nullptr
         */
-        Command(OrderBookPtr order_book);
-        Command();
+        Command(Table *table);
 
         /* Getters and Setters */
         void setType(StatementType);
