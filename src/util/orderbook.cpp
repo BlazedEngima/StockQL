@@ -37,8 +37,10 @@ void OrderBook::remove(float price, unsigned int quantity, Side side) {
 }
 
 // Helper function to print a side of the orderbook
-void OrderBook::printSide(std::ostream &os, const PriceMap &map, bool topFive) const {
-    if (map.empty()) {
+void OrderBook::printSide(std::ostream &os, Side side, bool topFive) const {
+    const PriceMap *map = (side == BUY) ? &(this->bids) : &(this->asks);
+
+    if (map->empty()) {
         os << "\tNo orders" << std::endl;
         return;
     }
@@ -46,9 +48,15 @@ void OrderBook::printSide(std::ostream &os, const PriceMap &map, bool topFive) c
     os << "\tPrice\tQuantity" << std::endl;
 
     // Print the top five or all of the orders
-    int count = (topFive) ? 5 : map.size();
-    for (auto it = map.rbegin(); it != map.rend() && count > 0; it++, count--) {
-        os << "\t" << it->first << "\t" << it->second << std::endl;
+    int count = (topFive) ? 5 : map->size();
+    if (side == BUY) {
+        for (auto it = map->rbegin(); it != map->rend() && count > 0; it++, count--) {
+            os << "\t" << it->first << "\t" << it->second << std::endl;
+        }
+    } else {
+        for (auto it = map->begin(); it != map->end() && count > 0; it++, count--) {
+            os << "\t" << it->first << "\t" << it->second << std::endl;
+        } 
     }
 }
 
@@ -60,27 +68,28 @@ void OrderBook::topFive() {
     }
 
     std::cout << "Top 5 bids:" << std::endl;
-    this->printSide(std::cout, this->bids, true);
+    this->printSide(std::cout, BUY, true);
 
     std::cout << std::endl;
 
     std::cout << "Top 5 asks:" << std::endl;
-    this->printSide(std::cout, this->asks, true);
+    this->printSide(std::cout, SELL, true);
 }
 
 // Overloads the << operator to print the whole OrderBook
 std::ostream& operator<<(std::ostream &os, const OrderBook &orderbook) {
+    // To be changed so it prints out all query fields instead
     if (orderbook.isEmpty()) {
         os << "Orderbook is empty" << std::endl;
         return os;
     }
 
     os << "Bids:" << std::endl;
-    orderbook.printSide(os, orderbook.bids, false);
+    orderbook.printSide(os, BUY, false);
 
     os << std::endl;
 
     os << "Asks:" << std::endl;
-    orderbook.printSide(os, orderbook.asks, false);
+    orderbook.printSide(os, SELL, false);
     return os;
 }

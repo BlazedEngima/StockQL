@@ -28,7 +28,7 @@ class OrderBook {
         *   PriceMap - The side of the orderbook to print
         *   bool - True to print Top 5, false to print all
         */
-        void printSide(std::ostream &, const PriceMap&, bool) const;
+        void printSide(std::ostream &, Side side, bool) const;
 
     public:
 
@@ -51,6 +51,14 @@ class OrderBook {
         *   topFive() - Prints the top five bids and asks
         */
         void topFive();
+
+        /*
+        *   print_entry() - Prints an entry of the orderbook
+        *   Side - The side of the orderbook to print
+        *   bool - Choice to print price or quantity, true for price, false for quantity
+        *   unsigned int - The index of the entry to print (1 - 5 corresponding to lowest/highest bid/ask)
+        */
+        void print_entry(bool, Side, unsigned int);
 
         /*
         *   print() - Prints the orderbook
