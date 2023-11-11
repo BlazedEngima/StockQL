@@ -11,9 +11,13 @@ all: $(TARGET)
 $(TARGET): $(SRC)
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
-.PHONE: clean
+.PHONY: clean rmdb
 
 # Clean
 clean:
-	rm -f $(OBJ) $(TARGET)
+	rm $(OBJ) $(TARGET)
+	rm data/db/*
+
+rmdb:
+	rm data/db/*
 
