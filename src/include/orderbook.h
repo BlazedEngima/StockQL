@@ -22,6 +22,8 @@ class OrderBook {
         *   asks - A map (price, quantity) of the top asks
         */
         PriceMap bids, asks;
+        float last_traded_price; // The price of the last trade
+        unsigned int last_traded_quantity; // The quantity of the last trade
 
         /*
         *   printSide() - Prints a side of the orderbook
@@ -38,6 +40,21 @@ class OrderBook {
         bool isEmpty() const;
 
         /*
+        *   set_last_trade() - Sets the last trade price and quantity
+        */
+        void set_last_trade(float, unsigned int);
+
+        /*
+        *   get_last_trade_price() - Returns the last traded price
+        */
+        float get_last_trade_price() const;
+
+        /*
+        *   get_last_trade_quantity() - Returns the last traded quantity
+        */
+        unsigned int get_last_trade_quantity() const;
+
+        /*
         *   add() - Adds an order to the orderbook
         */
         void add(float, unsigned int, Side);
@@ -50,15 +67,15 @@ class OrderBook {
         /*
         *   topFive() - Prints the top five bids and asks
         */
-        void topFive();
+        void topFive(std::ostream &) const;
 
         /*
-        *   print_entry() - Prints an entry of the orderbook
+        *   print_entry() - Prints a specified entry from the order book
         *   Side - The side of the orderbook to print
         *   bool - Choice to print price or quantity, true for price, false for quantity
         *   unsigned int - The index of the entry to print (1 - 5 corresponding to lowest/highest bid/ask)
         */
-        void print_entry(bool, Side, unsigned int);
+        void print_entry(std::ostream &, bool, Side, unsigned int) const;
 
         /*
         *   print() - Prints the orderbook
