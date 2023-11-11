@@ -2,15 +2,24 @@
 
 // List of keywords for database operations and their corresponding StatementType
 const static WordList keywords = {
+        {"INSERT", STATEMENT_ADD},
         {"insert", STATEMENT_ADD},
+        {"ADD", STATEMENT_ADD},
         {"add", STATEMENT_ADD},
+        {"NEW", STATEMENT_ADD},
         {"new", STATEMENT_ADD},
+        {"TRADE", STATEMENT_TRADE},
+        {"trade", STATEMENT_TRADE},
+        {"DELETE", STATEMENT_REMOVE},
         {"delete", STATEMENT_REMOVE},
+        {"CANCEL", STATEMENT_REMOVE},
         {"cancel", STATEMENT_REMOVE},
-        {"trade", STATEMENT_REMOVE},
+        {"SELECT", STATEMENT_QUERY},
         {"select", STATEMENT_QUERY},
+        {"EXIT", STATEMENT_EXIT},
         {"exit", STATEMENT_EXIT},
-        {"q", STATEMENT_EXIT}
+        {"q", STATEMENT_EXIT},
+        {"Q", STATEMENT_EXIT}
 };
 
 // Getters and Setters for Command class as well as its Constructors
@@ -107,10 +116,16 @@ MetaCommandResult Command::executeStatement() {
             return META_COMMAND_SUCCESS;
         }
 
+        case STATEMENT_TRADE: {
+            this->last_traded_price = this->price;
+            this->last_traded_quantity = this->quantity;
+        }
+
         case STATEMENT_REMOVE: {
             this->order_book->remove(this->price, this->quantity, this->side);
             return META_COMMAND_SUCCESS;
         }
+
 
         case STATEMENT_COMMAND_UNRECOGNIZED: {
             return META_COMMAND_UNRECOGNIZED;

@@ -13,7 +13,7 @@
 
 /* Typedefs */
 typedef enum {META_COMMAND_SUCCESS, META_COMMAND_UNRECOGNIZED, META_COMMAND_QUIT} MetaCommandResult;
-typedef enum {STATEMENT_ADD, STATEMENT_REMOVE, STATEMENT_QUERY, STATEMENT_EXIT, STATEMENT_COMMAND_UNRECOGNIZED, STATEMENT_EMPTY} StatementType;
+typedef enum {STATEMENT_ADD, STATEMENT_REMOVE, STATEMENT_TRADE, STATEMENT_QUERY, STATEMENT_EXIT, STATEMENT_COMMAND_UNRECOGNIZED, STATEMENT_EMPTY} StatementType;
 typedef std::unordered_map<std::string, StatementType> WordList;
 typedef std::shared_ptr<OrderBook> OrderBookPtr;
 
@@ -25,8 +25,8 @@ class Command {
         std::string symbol; // The name of tradable instruments
         Side side; // The side of the order
         StatementType type; // The type of the command
-        float price; // The price of the order
-        unsigned int quantity; // The quantity of the order
+        float price, last_traded_price; // The price of the order and the last traded price
+        unsigned int quantity, last_traded_quantity; // The quantity of the order and the last traded quantity
 
         /*
         *   order_book - A pointer to the order book
