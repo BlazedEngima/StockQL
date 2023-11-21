@@ -13,6 +13,9 @@ The software attempts to deliver an SQL-like experience with its REPL front-end 
 - Fix file directories
 - Add security encryption
 - General support for different file types
+- Restructure the project
+- Add automatic testing
+- Move to Cmake
 
 ## Design Plans
 ![Schema](img/schema.png)
