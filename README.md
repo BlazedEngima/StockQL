@@ -1,9 +1,18 @@
-# Database
-Data warehouse software for time-order series data in trading markets.
+# StockQL
+StoclQL is a data warehouse software for time-order series data in trading markets.
 
 This database design attempts to efficiently store and retrieve time-ordered series data, specifically for trading markets.
 
 The software attempts to deliver an SQL-like experience with its REPL front-end and querying format.
+
+> **_NOTE:_** This software is currently incomplete and is just a fun little project.
+
+## To do:
+- Fix critical cache bug
+- Add input parser
+- Fix file directories
+- Add security encryption
+- General support for different file types
 
 ## Design Plans
 ![Schema](img/schema.png)
