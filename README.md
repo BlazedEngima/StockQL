@@ -1,4 +1,4 @@
-# StockQL
+# stockQL
 StoclQL is a data warehouse software for time-order series data in trading markets.
 
 This database design attempts to efficiently store and retrieve time-ordered series data, specifically for trading markets.
