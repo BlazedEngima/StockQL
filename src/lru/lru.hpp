@@ -1,5 +1,5 @@
-#ifndef __LRU_H
-#define __LRU_H
+#ifndef __LRU_HPP
+#define __LRU_HPP
 #pragma once
 
 #include <iostream>
@@ -8,6 +8,8 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+
+#define DEFAULT_SIZE 1000
 
 // Data structure for the record data used to store query values for each epoch
 typedef struct RecordData {
@@ -23,20 +25,19 @@ typedef struct RecordData {
 
 } RecordData;
 
+template <typename Key, typename Val>
 class LRUCache {
  private:
   /*
    *   A doubly linked-list of key-value pairs, serves as the cache
    */
-  std::list<std::pair<uint64_t, RecordData>> cache_list;
+  std::list<std::pair<Key, Val>> cache_list;
 
   /*
    *   A map of key to the corresponding node in the cache_list serves as a
    * lookup table
    */
-  std::unordered_map<uint64_t,
-                     std::list<std::pair<uint64_t, RecordData>>::iterator>
-      cache_map;
+  std::unordered_map<Key, decltype(cache_list.begin())> cache_map;
 
   /*
    *   The maximum capacity of the cache
@@ -47,7 +48,7 @@ class LRUCache {
    *   Helper function that moves performs cleanup to ensure
    *   that the cache does not exceed its capacity
    */
-  void clean();
+  void clean(void);
 
  public:
   /*
@@ -61,37 +62,37 @@ class LRUCache {
   /*
    *   get() returns the value of the key
    */
-  RecordData get(const uint64_t &);
+  Val get(const Key &);
 
   /*
    *   exists() checks if the key exists in the cache
    */
-  bool exists(const uint64_t &);
+  bool exists(const Key &);
 
   /*
    *   put() adds a key-value pair to the cache
    */
-  void put(const uint64_t &, const RecordData &);
+  void put(const Key &, const Val &);
 
   /*
    *   size() returns the size of the cache
    */
-  unsigned int size() const;
+  unsigned int size(void) const;
 
   /*
    *   update() updates the value of the key in the cache
    */
-  void update(const uint64_t &, const RecordData &);
+  void update(const Key &, const Val &);
 
   /*
    *   get_oldest_key() returns the least recently used key in the cache
    */
-  uint64_t get_oldest_key() const;
+  Key get_oldest_key(void) const;
 
   /*
    *   get_recent_key() returns the most recently used key in the cache
    */
-  uint64_t get_recent_key() const;
+  Key get_recent_key(void) const;
 };
 
 #endif

@@ -1,4 +1,4 @@
-#include "../include/LRU.h"
+#include "lru.hpp"
 
 // Constructor for RecordData struct
 RecordData::RecordData(const std::vector<std::string> &tokens) {
@@ -60,15 +60,20 @@ std::ostream &operator<<(std::ostream &os, const RecordData &data) {
 }
 
 // Constructor for LRUCache
-LRUCache::LRUCache(size_t capacity) { this->capacity = capacity; }
-LRUCache::LRUCache() { this->capacity = 1000; }
+template <typename Key, typename Val>
+LRUCache<Key, Val>::LRUCache(size_t _capacity) : capacity(_capacity) {}
 
-unsigned int LRUCache::size() const {
+template <typename Key, typename Val>
+LRUCache<Key, Val>::LRUCache() : capacity(DEFAULT_SIZE) {}
+
+template <typename Key, typename Val>
+unsigned int LRUCache<Key, Val>::size() const {
   return this->cache_map.size();
 }  // Get size of LRUCache
 
 // Helper function to clean the cache
-void LRUCache::clean() {
+template <typename Key, typename Val>
+void LRUCache<Key, Val>::clean() {
   while (this->cache_map.size() > this->capacity) {
     // Get the key of the last element
     auto last = this->cache_list.end();
@@ -79,7 +84,8 @@ void LRUCache::clean() {
 }
 
 // Get the value of the key
-RecordData LRUCache::get(const uint64_t &key) {
+template <typename Key, typename Val>
+Val LRUCache<Key, Val>::get(const Key &key) {
   // Check if the key exists in the cache
   auto it = cache_map.find(key);
   if (it == cache_map.end()) {
@@ -95,7 +101,8 @@ RecordData LRUCache::get(const uint64_t &key) {
 }
 
 // Check if the key exists in the cache
-bool LRUCache::exists(const uint64_t &key) {
+template <typename Key, typename Val>
+bool LRUCache<Key, Val>::exists(const Key &key) {
   // First checks the most recent key
   if (this->cache_list.front().first == key) {
     return true;
@@ -105,7 +112,8 @@ bool LRUCache::exists(const uint64_t &key) {
 }
 
 // Add a key-value pair to the cache
-void LRUCache::put(const uint64_t &key, const RecordData &value) {
+template <typename Key, typename Val>
+void LRUCache<Key, Val>::put(const Key &key, const Val &value) {
   // Check if the key exists in the cache
   auto it = cache_map.find(key);
   if (it != cache_map.end()) {
@@ -121,7 +129,8 @@ void LRUCache::put(const uint64_t &key, const RecordData &value) {
 }
 
 // Update the value of the key in the cache
-void LRUCache::update(const uint64_t &key, const RecordData &value) {
+template <typename Key, typename Val>
+void LRUCache<Key, Val>::update(const Key &key, const Val &value) {
   // Check if the key exists in the cache
   auto it = cache_map.find(key);
   if (it == cache_map.end()) {
@@ -138,11 +147,13 @@ void LRUCache::update(const uint64_t &key, const RecordData &value) {
 }
 
 // Return the least recently used key in the cache
-uint64_t LRUCache::get_oldest_key() const {
+template <typename Key, typename Val>
+Key LRUCache<Key, Val>::get_oldest_key() const {
   return this->cache_list.back().first;
 }
 
 // Return the most recently used key in the cache
-uint64_t LRUCache::get_recent_key() const {
+template <typename Key, typename Val>
+Key LRUCache<Key, Val>::get_recent_key() const {
   return this->cache_list.front().first;
 }
