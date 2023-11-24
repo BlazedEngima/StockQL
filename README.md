@@ -9,6 +9,7 @@ The software attempts to deliver an SQL-like experience with its REPL front-end 
 
 ## To do:
 - Fix critical cache bug
+    - Seperate add and select via SQL-like add command with its own detection logic
 - Add input parser
 - Fix file directories
 - Add security encryption

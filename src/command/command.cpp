@@ -1,4 +1,4 @@
-#include "../include/command.h"
+#include <command.hpp>
 
 // List of keywords for database operations and their corresponding
 // StatementType Contains SQL-like command directives, not all are implemented
